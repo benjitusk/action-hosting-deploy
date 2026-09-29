@@ -29,10 +29,25 @@ export function createBotCommentIdentifier(signature: string) {
   };
 }
 
+/**
+ * ScheduLearn's staging previews also answer at `<name>.preview.schedulearn.com`, through a
+ * CloudFront proxy. Only that address can use the passkeys made on ScheduLearn's real sites, so the
+ * comment links there instead of to `web.app`.
+ */
+const SCHEDULEARN_PREVIEW_URL =
+  /^https:\/\/schedulearn-app-staging--([a-z0-9-]+)\.web\.app\/?$/;
+
+export function toScheduLearnPreviewURL(url: string): string {
+  const match = SCHEDULEARN_PREVIEW_URL.exec(url);
+  return match ? `https://${match[1]}.preview.schedulearn.com` : url;
+}
+
 export function getURLsMarkdownFromChannelDeployResult(
   result: ChannelSuccessResult
 ): string {
-  const { urls } = interpretChannelDeployResult(result);
+  const urls = interpretChannelDeployResult(result).urls.map(
+    toScheduLearnPreviewURL
+  );
 
   return urls.length === 1
     ? `[${urls[0]}](${urls[0]})`
