@@ -42,12 +42,17 @@ export function toScheduLearnPreviewURL(url: string): string {
   return match ? `https://${match[1]}.preview.schedulearn.com` : url;
 }
 
+/**
+ * Lists the deployed URLs as markdown. A `previewUrl` replaces them all with that one address, for
+ * sites that serve previews somewhere the deploy result doesn't know about.
+ */
 export function getURLsMarkdownFromChannelDeployResult(
-  result: ChannelSuccessResult
+  result: ChannelSuccessResult,
+  previewUrl?: string
 ): string {
-  const urls = interpretChannelDeployResult(result).urls.map(
-    toScheduLearnPreviewURL
-  );
+  const urls = previewUrl
+    ? [previewUrl]
+    : interpretChannelDeployResult(result).urls.map(toScheduLearnPreviewURL);
 
   return urls.length === 1
     ? `[${urls[0]}](${urls[0]})`
@@ -56,10 +61,11 @@ export function getURLsMarkdownFromChannelDeployResult(
 
 export function getChannelDeploySuccessComment(
   result: ChannelSuccessResult,
-  commit: string
+  commit: string,
+  previewUrl?: string
 ) {
   const deploySignature = createDeploySignature(result);
-  const urlList = getURLsMarkdownFromChannelDeployResult(result);
+  const urlList = getURLsMarkdownFromChannelDeployResult(result, previewUrl);
   const { expire_time_formatted } = interpretChannelDeployResult(result);
 
   return `
@@ -78,14 +84,19 @@ export async function postChannelSuccessComment(
   github: InstanceType<typeof GitHub>,
   context: Context,
   result: ChannelSuccessResult,
-  commit: string
+  commit: string,
+  previewUrl?: string
 ) {
   const commentInfo = {
     ...context.repo,
     issue_number: context.issue.number,
   };
 
-  const commentMarkdown = getChannelDeploySuccessComment(result, commit);
+  const commentMarkdown = getChannelDeploySuccessComment(
+    result,
+    commit,
+    previewUrl
+  );
 
   const comment = {
     ...commentInfo,

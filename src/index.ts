@@ -52,6 +52,7 @@ const target = getInput("target");
 const firebaseToolsVersion = getInput("firebaseToolsVersion");
 const disableComment = getInput("disableComment");
 const force = getInput("force") === "true";
+const previewUrl = getInput("previewUrl") || undefined;
 
 async function run() {
   const isPullRequest = !!context.payload.pull_request;
@@ -147,7 +148,13 @@ async function run() {
     } else if (token && isPullRequest && !!octokit) {
       const commitId = context.payload.pull_request?.head.sha.substring(0, 7);
 
-      await postChannelSuccessComment(octokit, context, deployment, commitId);
+      await postChannelSuccessComment(
+        octokit,
+        context,
+        deployment,
+        commitId,
+        previewUrl
+      );
     }
 
     await finish({
@@ -155,7 +162,7 @@ async function run() {
       conclusion: "success",
       output: {
         title: `Deploy preview succeeded`,
-        summary: getURLsMarkdownFromChannelDeployResult(deployment),
+        summary: getURLsMarkdownFromChannelDeployResult(deployment, previewUrl),
       },
     });
   } catch (e) {
