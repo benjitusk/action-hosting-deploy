@@ -59,6 +59,9 @@ inputs:
     description: "Pass 'true' to use the --force flag with firebase deploy. This will automatically accept any warning or prompts during deploy. Use with caution."
     default: "false"
     required: false
+  previewUrl:
+    description: "The URL to link in the PR comment and check summary, in place of the deployed channel URL(s). For previews served from an address of your own, such as a proxy in front of the channel."
+    required: false
 outputs:
   urls:
     description: The url(s) deployed to

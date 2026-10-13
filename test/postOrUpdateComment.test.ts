@@ -32,6 +32,19 @@ describe("postOrUpdateComment", () => {
     expect(comment).toEqual(multiSiteComment);
   });
 
+  it("Links the given preview URL instead of the deployed ones", () => {
+    const comment = getChannelDeploySuccessComment(
+      channelMultiSiteSuccess,
+      "fe211ff",
+      "https://pr42.preview.example.com"
+    );
+
+    expect(comment).toContain(
+      "[https://pr42.preview.example.com](https://pr42.preview.example.com)"
+    );
+    expect(comment).not.toContain("web.app");
+  });
+
   it("Can tell if a comment has been written by itself", () => {
     const signature = createDeploySignature(channelSingleSiteSuccess);
     const isCommentByBot = createBotCommentIdentifier(signature);
